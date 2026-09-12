@@ -116,10 +116,46 @@ mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 1p
   .item{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name amt" "group amt";row-gap:1px;padding-inline:16px}
   .name{grid-area:name}.group{grid-area:group;font-size:13px}.amt{grid-area:amt}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── lock ── */
+.lock{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;place-items:center;padding:24px 16px;transition:opacity .35s}
+.lock.out{opacity:0;pointer-events:none}
+.lock-card{width:100%;max-width:380px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0}
+.lock-card .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px;font-weight:500}
+.lock-card h1{font-family:"Gowun Batang","Nanum Myeongjo","Apple Myungjo",Batang,serif;font-weight:700;font-size:34px;line-height:1.15;margin:0 0 30px;letter-spacing:-.01em}
+.lock-hint{margin:0 0 18px;font-size:14px;color:var(--ink-2)}
+.pin{display:flex;gap:10px;cursor:text;padding:6px}
+.pin-cell{width:46px;height:56px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;transition:border-color .15s,transform .15s}
+.pin-cell::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--ink);transform:scale(0);transition:transform .12s}
+.pin-cell.filled::after{transform:scale(1)}
+.pin.focus .pin-cell.active{border-color:var(--accent);box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.pin.busy .pin-cell{opacity:.55}
+.pin.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.lock-err{min-height:22px;margin:14px 0 0;font-size:13px;color:#b8443f}
+:root[data-theme="dark"] .lock-err{color:#e8918c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lock-err{color:#e8918c}}
+.sr{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;pointer-events:none}
+.app[hidden]{display:none}
+@media (max-width:400px){.pin{gap:8px}.pin-cell{width:40px;height:50px}}
 </style>
 </head>
 <body>
+
+<div class="lock" id="lock">
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <p class="eyebrow">Wedding · Gift Ledger</p>
+    <h1>축의금 장부</h1>
+    <p class="lock-hint" id="lockHint">비밀번호 6자리를 입력하세요</p>
+    <div class="pin" id="pin" aria-hidden="true">
+      <span class="pin-cell active"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span>
+    </div>
+    <input id="pinInput" class="sr" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-label="비밀번호 6자리" autofocus>
+    <p class="lock-err" id="lockErr" role="alert"></p>
+  </form>
+</div>
+<div class="app" id="app" hidden>
 
 
 <div class="wrap">
@@ -164,8 +200,63 @@ mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 1p
   <p class="foot">이름 일부나 초성만 입력해도 찾을 수 있습니다. 같은 이름이 두 번 있으면 장부에 두 건이 기록된 것입니다. · <kbd>Esc</kbd> 검색 지우기</p>
 </div>
 
+</div>
 <script>
-const DATA = [["황순향",100000,"삼성증권"],["김동철",100000,"삼성증권"],["박동진",100000,"삼성증권"],["김성훈",50000,"삼성증권"],["박천호",100000,"삼성증권"],["김영경",2000000,"가족"],["진성은",300000,"친구"],["이다혜",400000,"친구"],["김재니",150000,"삼성증권"],["이선규",100000,"엄마빠"],["이수란",100000,"영경친구"],["이강욱",150000,"친구"],["정효진",300000,"친구"],["이형도",300000,"엄마빠"],["차동현",200000,"삼성증권"],["김종열",100000,"삼성증권"],["최비호",200000,"가족"],["유이슬",100000,"삼성증권"],["최인옥",100000,"엄마빠"],["박희주",300000,"친구"],["채정민",100000,"친구"],["이인재",100000,"삼성증권"],["이춘옥",200000,"엄마빠"],["김정은",100000,"삼성증권"],["정보빈",100000,"삼성증권"],["한근순 외 상원, 상구",500000,"엄마빠"],["구자성",300000,"삼성증권"],["송준범",300000,"엄마빠"],["김순옥",1000000,"엄마빠"],["최준호",100000,"삼성증권"],["서인정",100000,"삼성증권"],["정민우",100000,"삼성증권"],["지선팸",1200000,"친구"],["허재원",100000,"친구"],["최지호",200000,"가족"],["정이영",100000,"삼성증권"],["김현중",200000,"삼성증권"],["임규철",100000,"삼성증권"],["목동 (작은고모)",500000,"엄마빠"],["유영원",100000,"삼성증권"],["황아영",200000,"삼성증권"],["남승범",70000,"삼성증권"],["강민기, 한용철",300000,"엄마빠"],["이수화",100000,"삼성증권"],["이성혁",100000,"삼성증권"],["정선아",100000,"삼성증권"],["이보민",200000,"삼성증권"],["김수성",100000,"삼성증권"],["허윤경",150000,"삼성증권"],["강윤서",50000,"삼성증권"],["이혜린",100000,"삼성증권"],["김해찬",100000,"삼성증권"],["정유진",100000,"삼성증권"],["김남균",100000,"삼성증권"],["성시업",100000,"삼성증권"],["이민아",100000,"삼성증권"],["권종현",100000,"삼성증권"],["김준우",50000,"삼성증권"],["전상구",100000,"삼성증권"],["문예진",100000,"삼성증권"],["최윤자",300000,"엄마빠"],["이준규",100000,"삼성증권"],["김영균",150000,"가족"],["김이화",150000,"삼성증권"],["한효정",50000,"삼성증권"],["장자은",150000,"삼성증권"],["한귀석",100000,"엄마빠"],["함정옥",100000,"엄마빠"],["이다경",100000,"친구"],["조진영",100000,"삼성증권"],["박준병",100000,"삼성증권"],["방보훈",100000,"삼성증권"],["이한준",50000,"삼성증권"],["신재희",100000,"삼성증권"],["이동진",100000,"삼성증권"],["전세린",200000,"삼성증권"],["정서린/홍승민",400000,"삼성증권"],["용혜수",500000,"삼성증권"],["권형석",100000,"삼성증권"],["오주헌",100000,"삼성증권"],["유성민",100000,"삼성증권"],["권용",250000,"삼성증권"],["문초은",100000,"삼성증권"],["송윤수",150000,"삼성증권"],["박미현",200000,"엄마빠"],["홍주희",100000,"삼성증권"],["정유진",100000,"삼성증권"],["최범준",100000,"삼성증권"],["이주하",100000,"삼성증권"],["전문수",100000,"삼성증권"],["윤한일/오진영",200000,"삼성증권"],["김민수",50000,"삼성증권"],["정인후",100000,"삼성증권"],["반소진",100000,"영경친구"],["박혜진",100000,"영경친구"],["정상원",100000,"삼성증권"],["신호철",100000,"삼성증권"],["김진성",100000,"삼성증권"],["이호승",100000,"삼성증권"],["한성원",100000,"삼성증권"],["스페인이모(부)",1000000,"엄마빠"],["오선주",100000,"삼성증권"],["구슬아",300000,"삼성증권"],["최현승",50000,"삼성증권"],["박현영",100000,"삼성증권"],["권순일",100000,"삼성증권"],["강제훈",100000,"삼성증권"],["박민지",100000,"삼성증권"],["이진용",100000,"삼성증권"],["박민진",100000,"삼성증권"],["황선영",100000,"삼성증권"],["허존욱",100000,"삼성증권"],["나윤수",100000,"삼성증권"],["김지환",100000,"삼성증권"],["왕호준",100000,"삼성증권"],["김재원",100000,"삼성증권"],["신유미",100000,"삼성증권"],["이훈교",100000,"삼성증권"],["김판규",100000,"삼성증권"],["장윤철",100000,"가족"],["박창민",200000,"삼성증권"],["이충섭",100000,"삼성증권"],["홍현석",100000,"삼성증권"],["박창현",100000,"삼성증권"],["성연진",100000,"삼성증권"],["류현웅",100000,"삼성증권"],["최윤식",100000,"삼성증권"],["맹현선",100000,"삼성증권"],["류정현",100000,"삼성증권"],["김영옥",100000,"삼성증권"],["손기혁",100000,"삼성증권"],["정재현",100000,"삼성증권"],["어용일",50000,"삼성증권"],["박세형",50000,"삼성증권"],["조형석",200000,"삼성증권"],["김창원",100000,"삼성증권"],["정재호",100000,"삼성증권"],["전현서",150000,"삼성증권"],["윤유성",100000,"삼성증권"],["황용규",100000,"삼성증권"],["김기범",100000,"삼성증권"],["이준홍",50000,"삼성증권"],["정윤숙",50000,"삼성증권"],["장병수",50000,"삼성증권"],["김오방이",2000000,"친구"],["전세호",100000,"삼성증권"],["김회원",150000,"삼성증권"],["장유준",100000,"삼성증권"],["김민희",200000,"삼성증권"],["김세원",100000,"삼성증권"],["권택두",100000,"삼성증권"],["김지환",100000,"삼성증권"],["이승엽",300000,"삼성증권"],["김소연",100000,"삼성증권"],["임종경",200000,"엄마빠"],["신현민",150000,"삼성증권"],["임광수",1000000,"엄마빠"],["한부근",200000,"삼성증권"],["박민호",100000,"삼성증권"],["이정영",50000,"삼성증권"],["강경민",200000,"삼성증권"],["심현정",100000,"삼성증권"],["임일수",1000000,"엄마빠"],["이현석",100000,"삼성증권"],["김덕기",100000,"삼성증권"],["이한호",100000,"삼성증권"],["도옥현",100000,"삼성증권"],["배소윤",50000,"삼성증권"],["표승수",100000,"삼성증권"],["박종경",100000,"삼성증권"],["정겨운",100000,"영경친구"],["박소정",100000,"영경친구"],["남신애",50000,"삼성증권"],["신동현",100000,"삼성증권"],["김영찬",150000,"가족"],["이예리",100000,"삼성증권"],["추예나",100000,"삼성증권"],["한지혜",100000,"삼성증권"],["한종엽",100000,"친구"],["박기태",150000,"삼성증권"],["황상익",100000,"삼성증권"],["정재욱",50000,"삼성증권"],["오선미",100000,"삼성증권"],["홍영민",100000,"삼성증권"],["이영진",100000,"삼성증권"],["홍석표",100000,"삼성증권"],["서태희",100000,"삼성증권"],["이지훈",100000,"삼성증권"],["오병래",50000,"삼성증권"],["박가람",50000,"삼성증권"],["신원창",100000,"삼성증권"],["신현정",50000,"삼성증권"],["정희석",50000,"삼성증권"],["박진선",100000,"삼성증권"],["이주영",50000,"삼성증권"],["이홍기",100000,"삼성증권"],["박은희",50000,"삼성증권"],["시내어머니",200000,"친구"],["이지수",100000,"삼성증권"],["김정환",100000,"삼성증권"],["결혼축하드립니다.",100000,"삼성증권"],["최은영",100000,"삼성증권"],["이성재",50000,"삼성증권"],["김동환",500000,"엄마빠"],["윤도현",50000,"삼성증권"],["김현우",50000,"친구"],["이진호",100000,"삼성증권"],["남주엽",50000,"삼성증권"],["김진아",50000,"삼성증권"],["김희선",200000,"삼성증권"],["최성주",50000,"삼성증권"],["최은규",100000,"삼성증권"],["임지희",50000,"삼성증권"],["양정균",50000,"삼성증권"],["김형선",100000,"삼성증권"],["하성협",50000,"삼성증권"],["음지영",50000,"삼성증권"],["양성열",100000,"삼성증권"],["허원영",100000,"삼성증권"],["권희은",100000,"삼성증권"],["조혜란",50000,"삼성증권"],["김형주",50000,"삼성증권"],["이상우",50000,"삼성증권"],["지선언니",300000,"친구"]].map((r,i)=>({i,name:r[0],amount:r[1],group:r[2]}));
+let DATA;
+const ENC={salt:"SO9olCKIL6Bzg+TTdsUuKg==",iv:"suQPs7z1fQ5AO4uX",ct:"UTEoZNwSbD8yhpPEfZ80hb8QRbdw13xvlJTNvwa2WXMuyveWeRZbuGJBmdTAx2niYw9v/N3x/GrVWUPiULoX2l3X15LEadHYJzPmWVsmFRzbKac5R0MO5Mw/DKakFjS2rqzTl72M8TnCoK9jw/kMAib/LBD6LfqBtIb6SbdkdFhfhM5ATW65nOBVB+8WcRSGCl6hXdV0OFGoc1VHCL3fvhsR+X9C7OFQ68IukR0IUapsztXuUJoFv9NNJkMBjhE+TipG1jb9PXwjw2FIuFkZ+A3JQz7nFUznTbwXWUAXqPDammbHmtJ2BpN9D/p6aTZW7kyywbZfDe8/AyDp2v467L3cCp6o07b7kdNNLkAUoDywCwY97G0ukmIGkKuw9MMTr/0qySbUKEYdxNay4BI7+30XguOoPT4/yCrsYNROh6ezkrNr64BwneTmBiUsLRRXXEUbUHjvA5M3lz4QmHxF24oUhxnqop0hfhLaoO/sKfWfjkv+pFrYUKnLvWPmdHz8jWt/SK2/eGTJLdXKEsdheogyQN34L8k6yl/dqt9bjGWhPUxlHr8HnVxHQieRwvRjxmg8ahUcmmU8faO84Hrz2MP/Z4O/L+i2oGWZW5cgAk9xjqZwwgqEG53KNrjoYJLjjQ2o0Yt7dFxHUO/qyS5eJnU5xE0pHXqUCY6crKwHgFXpQKwZRpWAmxjntcHuwLO3GOH4Ab2JoUsFtAjqjAdFGSS2IMx7TleYE+QyHtKmIi0CI+If+EVQEU7B/kmdPma76QprdyVQM8OFXo4knUPun7FR84fbrR/mdLyDaJFBH15wn0eNktGVihZ6Ub5Akyl8TAYuGd0uwpTWG13zO3IeTCEdDO4jJ1seB1hU976U8III0aa3gzh6c9Xq4vc+Ikf+EeVj3CAK1jeZ+hkE9YZXKztA72mkLJTJmCBRciwALevG4Fp2E9mpT77d+Uml2NbrbpPwuslah/N09afz5wjXQh4vud3aargVlcDJzjesj3uvQEKlB5gTx42QFuP75KeF3j+M+fBJ8/1hmWhfS4wmeLCN8Jj7lBsc0DigA9Qmq7opP+GTToN5H6ouLKWkK7bS2P5r88GAEqv+ImshkAkzZhwrWoJumNR0o2jHdT/dqfVDZ82lExAiuYB7/Ji9EahNcXnB1CGncAQRzJzKzCm1SFOfpLDPbA7/aIHn719min/PQt0n17/O/dgv0Mnp7RUjBhZu8EANPP6JD8J7YwY3ql8Qbol6FGT42LGyDL3NafeA+VzqKdfjMZUiRVx8uu3HMqt84GsRMENXi+pOOnix89FUy8o14di1aXdjqls9gUsOQf8fwMRviGcFszeiVQszh7QYat5t/QgS2E+heBGR0JS9Vj0k7dOEKo3J6lOVLcEfoLM4/li6Rgs5bPajfIz4DUIspfvqEHrKI90gmHhJ+5IDX9Eu50itwUBAvUdZEjZ4yINkeOmBXQb630lAqBqnxUcJgrxqcL7fVhX6q15oxtgYIMunS+KaW4oIcBRlvav+d/8fxNeQGZmqtIvdfelHq/n4m6vl0L2zYq6OH/lXER30WiILvBcU4hU5jdBvwmZV3F1M9EtnHRftyM5asbHNnfvvRhXe5AR0dD29Q8kWaZyqleUeczRN46RPqrqgly0qqDEzx2xOhvwGOodaSLoE2oRIsbzi/nnf5zLfEv4ov09QZRdWsjte3Jgqqoa+iTZD0GbvOA6QF99xnnl+w+XuWFA5sgUp4OZ3SH/iu0dw0Kg2PnQppeIijrB9p2RYL0QRsZ3s8CqTcNO5+y9xaYqU2kPvCfZv8W8k0hXr9EA23i4GNOJ6L9ZlBm3Gtqi1PLNx1XdeJaJ7xyVgnr47gkTAzcD09wvajkR71hvBT7IATwbWnLIEVqC1oU07inJt1VXM6Fm8VM6Mb9fnz0mM06G16HB8wyHQiPtx1KK6zgiMFWOE6N61PPcOxz0YhY8rPXAdVvDMVzrKG2Jj2B64DjKz8Y147lgcW/2sd+kJJoEjgHh0/83au/4sENyrOwk94Fen3fQhw1TsMBzKepA01Iyip2qzTt6uq8b61SebspmxFWOnLmfvs+lR725QhgDnN0QrVmisJ1baE5RFJ3b/9NlUvgjIi4RMGUWBWwZXfiXW1YO+hxPhguoEBWPgjrYBLQWAqdZZfelrBX0v7EeaiYO/KeFxUmRbg1av3uXYWr5mcRW4eG/JGqht07+S0Ool3Bs3WnGT+W65IX+T3MpJWBoOiGCbyE74fyWu7lQk108lFLR0S9KPg4yzFECda/zijykkUqbzKBJUggvuv7EpNNgo7hQ5zLfY59vkobGAxGlKV+eP6bzQlkggaPDwyaptPhwY0xZJia7wRSy73JoSNTarXBx12LjVs7UawTCYcZkkVoDUnnW1S6WmMhhs2bEPlKJEKV/TeTDRyk3cPa6KjWTy1NDNhqJCVqF0oUTe9OuGcaAd+hcaqPs32XYU9L0kATNS69PJFDtoPBkPUZJeEQUB7lvqCXlj7uHFZqqSez7wcfrH0Mi+1U8apYOXQ9Ar2F6Hjns9+CTGr/Ler8WAgGCwsHy4rcJVJubekZcfNONL3XR8OGbAj3MEx8+Wc8FSATlNGT6JkNmO/+56Ojl0Xdk/SVecqagUAW7hJbXs4Cc+0jyCpij1NnesSNnlvc61gmc7zMcYcBTKAqzUD/cFIVcNZ6XC8oQKT8OCepDHTW6LCEgdN6vZIwhksxspOZw5fglEm0CjEwE9yPNkNKWkxQFWjyKtnYT3L86v0DN5zrU2563BJnWGHSLPH5y57OiHW5nhGwPRpCXPUn02fssUvQz+kcWgPLCU4tAGdXeG2P8vEDRWj7Smd1IRN9dfsi/OIs3DI68xB5YjteZwWBcUtQvf01H8KoFbzUylro1abJg1SQgzF2BD2yBZFqElhnjm70J4th+8HOQGkncprywTticEgAuFblY9PxJDFxDuGxzZ7Ve5vnKtscFvfwt2ipKuBg683f7h6Z85Ao/keN1oDxXgMAalMcIPe25s2rNhcv92h/4sBjICPK/vliKDVbdlOaNKHXZTvpx2gqBYAFtXoY/lmnPUuiOM8pN1pTJFey5EmGdHa3vXddFZRUWwFfG5OBV8YsyNPE8IRFkE48OolK91NbXMoLQBGj9f0nefuFk/qHwHFGQ47+l4vMNTiJDQKT+NAvsy8ZHr3BgXlmbTL/TEdWOq6fIVwH8XdOZgm2QDVukxduHv6EjOD8LJKJ6m0U20KF96+wxJ27NiEIecQQEvQ9Vh8OdAklJ/hqBJzS03yzXt76GxiGjY5N22/X1+oGelpvCcSNRgwO8Yhk90nbaHCUT1UG3FxNdeSPiat0PRmrYaTF73EgjTsx46r1MquuPgSmpOh7Auv5yynbRdZmf2ZgC9O3ry/ZMDfNrA9u83SbQEHy9BWCUvU2ybsJmspFYM//2MlazydefAYVV4J6CpWns8Uu6J4LGvltY/XcNaBZZ99+TepFJzKmVdlbqIWTlO7vF/1fAoaFDSYlOjldVCn0advn7NS4gqOVY0GkgbzHCcMt6omNip7LmKa+Ks7/dPnV/Qva6ePuK5K7A7Cda5TDUjYqJhnq2mzwJn4/+aXGytQY28+jv9tbiHO01P+AmVLxCnWNL0UMcQZ9UPg73x2+j50ZUAqEuenh+d39GuPNEr8XR9ZsvMZl8cEFM9e8vd0DJPpiBZ29iEeUuWpTkrODOWwDXtouk1SttYqA+cJ5DDtc3tjaBJkjrM/0JtI+HZBGDaqaJOTcpsi1ScTNkPyQgmOKjWESctd73ekc1rahZDxWpoXyslfLmp9VAxzZ6m4SZSOzXraSY8Fj08jNLqtMwB5vcyZUCJP6hhmLxecTJhj2y3sik2Sqx3c/ShDlmbMZPmSjtbJAY6KFs/5shKUqc2VnfntUpn88nNWtzEBWvxU3chBESHZOstJIlggOhZGy0OGQQzfbolMy/uf7FjmmueYLZfZlNyBBxVYDgnErN6sqJ4YuLJwYRXnhD9zH50KGCEtfu00hAhr6e9/lOdGX75/oNgHGwq4G2geirqk0XfAYhxTu9nBUErD75uB2g35b1iANn6G3iEyGWbcxVV9q9grtKOW+K7FtigxzvClvC5pI7AngRSdT9CQSpt96IuqjxVbmyO/rt9hz0Wq9xQ/MHvSveCIxjaanpIb0Z8yZnSbQBMn46Gw0rU+XkNEiz4treNglAVIQnqWaB3wXvPaDAZgxkbKKvCRW3lY7X1eGAY1cdhK28ItvIaeObbH21A14EIM4pwZK7LUZ1vJ4eId29t+HsHhDXJz004+o9xyQnsohKwyVEZ4LOfdLWcK0y63r+6DqlMZIQ9pEjFvhYrYNNMOmu0KaPBh24zqcY+2cBY0o1yJDnR27RuP6Z1MHrnhuXq0cazYag5MYR72YAuleQX4c/AytSRG1+nsrwZp5rRwd0s+Lw/3vYRAkd2YP4ZsKrvB7nPuycHrVkw/8f6sF/XopGbW+g2KwOUZlKdcXpXSeSUS1KAUkzMeYfH6dsvw+9aqDfZjsRoUbDPP0keI+1c4onikiRsfPn1kd0ekaVaBDIaFjBxp19ez4dZ3DiAFF7C8TNZlrOUgyzp94kBreAOdylG8KUkGWhl6OUEV4Tje2a1vGyLwYkdLYC+gcKcHzMmWJQ72GVWMRXNvz2gIbwakdK8ZjiXTyLfaJq0dTRZTPARSFAQtIFD17aaZs/dWfmGRwMpwnlCoRDKuZJ65mhZiS9h5NJspwMb84mEvCTHTOak70w7UzIaRplp3oh4MHw7V8IysDgy6M0U681DOuOqSi/3XTmyW1rlrejilSp+sDFPvYPUfWVXjRt55zxp7Td9DOFKBr0r/wA6+4TguB/fKQTnFA/ByyNNSxbVRGvzL/pKP1r5SBxbuNsPtO24kk7Yl/xgAbCp9cQBbFTMs8GtjdD18iPgXA+NCY/GQen+x0WbkMH796DmiYZICuroLCdhPt5lnNm5cmsI44v5dO3yTc9adE2L6eiHCOKtbD/W9XCWtxZT7Jys7fz4C4SbjkJjLn2JTnAVF4O3r+A6GKTGm0BXR0Lk3/dl+hTBfgFD+fvyK7Z3RyiHvOglv97Ec2YRGzUFZsmoBqXLitRTMNSK/Vm6wlFWBf4gkcZ5D31b1p7Oys+wH/X+3gO/2nHM0B7tjNJ82I3x86ogQfSkuoH/fSURKAoIUZRxHXBoboaOSzhGsvv64IWgB7Olt81w//d3CnlnzkzQBkq6g1MD19irnafoYjCbmNS25E7LXaeFjtwZ/shTw0zI82VErvKIeI01u9gIbjSpWvwDWFOdarz++H20DoC8r/M9JI7PXsK2VTm4byYZJcfEeAzjQeNNuItBleYctKO76eFBIZiSvL5jm801o/0kIxkyuu5C6xVp5JFckPru4P8Ed6ASVu1hGXZ88m/vmCWyKZi4MTSDcHyRcMMBzO1lCz/WXDOKTk3kgvCnNxVkemAsYTaE75MSrqCFCGbkAzg2/VkdYi+zXAOxKTLrrJFANVxxVF76r+r9WVjR7A13BsAeE2WeAFmIP3rXDSHJCvhtM09opmiVMBF8XmgbmquvGemOfndpYzdrEUcmu+grr+gs/1aC8d26M+rWFP7qypK1hDPbGqqmNgxiRY45hHro1Y5kubUPSS8KR0dSSEka5fa6y1GbJDs1oGxPYrLtriPbCPy/1rtrO0laMaQTpcDm635vqDHp5yUdzL4v4WN49sJeWpRs6T0NkviOFZuqb7mtcLV4oqO/lWTn38vmv2oSrEMSjlLBs7nU0cZdKwCgfOcUxQhj/Fug3RcwaO1snhLk3CFZ3OT3jmCCNUTbLlsa8Q8sHR+igyAgOi7xHgkQnFuicJApa4AvIV8twHqCm37X/x7Yc++mvuVYf7jhsqH26LfrzSr8td9BN++cDFaJdmjQmsyRZ6t8nRfj1A6qOvr8+Z8Z2aWINsv3zzdbLgQHFl/ep8qvfSQPaq6oVG348m2Bkbr7k5SHjnvAU/zBzCpLX4VkaDvIkWDIGgewXEToMNyxTcvulhQtbMCsUgmccEaQOehXzSPHjPos/pjrMtwSNw8kJpP861XRp5en7rmLHzuGfKwNeKpYlvN5pbtWitpvTTUpN7hF8bFlv3bLm3XMV1g1UpEaVDm3duW567Oe8ZbAxTp9Q+rYbhXRtfm/lm3xIUw6YdhZvqILbEdaugprj701D1Iy5+2WW0JlyKG6Lc77WwMBFIqWRwGg9PLi6Xmui+fFheUhzDJSa58ecanvzuHo5lrZgBEYyrvoDigXYl3KTqueHMi4FISj0msVBhRjiSXJEN5oDvfxkua72FkBDI9loOGLNMU1r0xuPA5YgiK+sba8QpvcqN4f/9tmRGIfT2aQnSOlz7vi0b6e7xNTup3ONWqC0iFk08tVsAus5DIl4mEVcSlqVHAZjoWlylkMzgln1ei7Zvfxd8pSh6BfezLqPjiBiuHMrPvvx0Gi5hHSiidaNWkUE+WEze9fVvEa0byPkumfSdv8MBnXHDGDWn1gUp2GYJSsCVU/QH3t82jML7FR+7D9Hb04Jw5AIn/bv4cJxN5dUehGmUx2u6IXbQpjzZfJ2i33Mlqagrw4SoFt2Gs6qixkN5iDlFPcBbnDlBa4DkAKZeBvYTw35/iqTXmcthTRhqXSy9THA3kj5QctmNWe2D8ngE3wnKPW6z9nIdgx4QbD2lnBYMEaputOzWKlQEZVzIOu4ed8wGej9/Xk6DFJM6azKAGCAkxXzag5fv7ZuhSbWvnpxdD1RD1Q9GoQiYDqIY5bAn/V2pO9Q38dU0IjE1zb8WiewAjoFzqIRwOwFo6IMt8p0VQ/Kk7GznivFijpB5KFP7I62A/9GBBpvKiSR7CcZpjnc9nIpxfjJ5GrEYtRmuqxkH+UhCRzdHIXQFVnnHC+MgczPQikRaaPJx5nYkbJfH4DgZLzuKOpb58VQ95hOYdQcsrruGDMDbomhWQ+RrFk0Sw5/ywEjrlakZ5EPCfvnPsWE43pQDoQuqxxqfhuPxOZCiyKjhJg7bciVdnxDpzmu4LvWZPMH6Ib9T5oLR5kpb3LcwM7hRYQyIP6BbSYUshzMtJPsOfx9HDxnjTb7bgY1EEZkzXTGya1syV8G4x5MNETmmD/Htu/CHoFA57LUmuN6xsneAuh7oSxwm6ecvokXLePnvLzJ8yCoPUhb3JI97QghR8Luk5xPqkjyLfx1iqk937A/Dnibze7bgi+cuWI1c8qdMTWQHqkzOYjxkR7zS17ohp7qdQaK8O94yIv7H+rgMztt5ZmyTmFWiqYjMVOZWMbpE5eQTDKomz9C+BT8ifex4rIa5SvbH/zQUR8isqD+OGRn/f8Ia69sh7taBaWSmAMkG5m+Kxu+CCMNY+gkbzqioay3R7c+6eK5yJuNjc4waykuw8Shisbuh4rgCr0/d0fOxF94DkbkVHezYeqEWi8h8Cw800dYSBOWnAdZ+bqCgLJvpUUlKJ1fAcLJLRhgvjx7dmuP7y/pU2bkYBZ7ZB+DkuTTRBw9cokPntL91ibtnLjM9HuWU09H0T3/2JvI1nf1VopkpvZvzXtXRk04wgA9KnasxUWLNUsOGnf/rstZwBHEZIXMPpy5DkQptOce58fzkZd6RhmPZXteTLXD806THFkP3ae6lx55KkEFdCCAqTdvjOM2B/TxszxAvD874PrunCVf1XtxTt43cQJs8iXgi0ks9H78Jj3FuOV5KoiVb1DA+h5kw62/OAaBTwxB6/1XGbPVutZyzNXpXXnx12Va/JPO3DIQAUwKmBL9jrqcBtw47OxoQ40XwoCKGMHVJ/XszBUbEgbpR4MIMBL6vp4y9gfy0kGYlbfgnLOlzSAY+1UFNW2fUHkMurOEGi5zgLzgAc5d+bLfHQ4lWWYHKfk+IcxEQG5+y2NcBqzXEBw/YbqYDSHmnZ2XAeQ3FFGnR16wGEzcGzFspyDzGfUGouce5CfbRpmKQiHxRpyidDVdzm7GEa4s2kp8URhEyXLt5kpWb2hltZlfhuFFdhCr7vPRENc6WSU4XoUk5U/vC7isirpU3KmRgglYy0PYPo8Yo1pS1asiiSTRNljAVPi1HGlmvcfIKJIHD4NNwPkoMeiozpIRLNZ/lObqgBGtNsXoUGqxSHCDWkxH6otq9N5L74ulfh2pyUTY7+n6QzpbZgTOYsG1vuvHVXuxFxG81Upnatv+/GkFTmGXjbnPuKSXgeg7x7uAn268Dy/cVBNIZLfHucb6asA5/AyvDwwS0K1GmngTQfPt93/MHHphNUMhgkApSLkMPgqzaDkLNsyynnsYJg8f+c/3JrVhWejvO3IkL+SuDQduyCui/+b19LCpPFG49TnN4EP3nWo8KqoWfjtNoOqviStU5CpabdfCIuodC/bHF6aFadI1KpKnjzbNB0peG1IynHlnNL0phmzxSWOkN6IT+1MW525KmxIXkIgsNTgV/IA2FCP8dr+92N5V/B8D2vI3ZL/yN3QqlfZNVNIUN1SlSJ5tTJOXFLLivtxs2rbPyE5HpYXYuwZztznw6U9mCBEahwlQ21ELeW4U6FTPaZlaDOTY9zmDM/FUSidUoTuRZLCI37Q3Y3TwXMmoBUJj4jzsmqDvd38LSovzJ3w7O+UUdAjay32sXhEOdBY995whglr+gMneZH3CthLvPwJ5EUVfLTrTRys878niexq/Twqs2PCHbRlLycsPmFCp+s8Vn3Wwh++ASPlkmZzL/rHReACIqkP9cwASYdMpUPmEG95hpNu2aaMEPjYcm++RIF/rZ2Z7oNZ3IlCZEwww5FmGKdV9y5q2IfZnpuS5RfQuk4Ei0si5hrxXUONLYhYTbxUu3v1rzYkmumrf/1qJ/MGAtRUV7evN1HcNT1UyKX2d3EPJdUf2XJBbTg5ApgmWU7/hktkBiHU9BEsceFgpNZvuaJqD9oJ08565Css2UxxM3yXkv24O1yi9eADkNLQm/jq/Y25eZn8QECLSIBDxqJDueCAsxr3m/l4KTBQppo82wdDo5aR5qsrpsyawHt9jRY4ThFclSFkjHUnKbldS+v/tFmzaWZ5bMY9rRg7fizuO6f//Nggme22c5peiplX17a3xlWBWsg0YhUbbxkqorqVUI05CX/y2up9bUVsRlAWu7mt3HrKdV0PVU3lb6A1N+LZNygTrY8Mbd6NDrW5kFuTxe0TE9595pawtPqqN2H9DIV8LN6NFUggtAjIwqxz7gLo66Y5SCGpJ00FDVlGn4GH1nY2wMafQdlzudXZWJCTacFJfrWvC9wrjLKi9N9G8LGGiAYpr9Aa96xYX7UJmCJzsO0rWrX1hB6yPlhye4ZxBQ0kJTGfJUWsU6aJKlIYuR73QPkgkhW9KJGN1Z9rFeKSmlSYkV/5XFi/Vye6r55JiZ3tUQi/qNbQn6pKk+9vq1z+pjDZWCj+vQYEVs8yHKmbsTPatfv7u58WGv1mamVROSrn/C9jLIQz6X+pw7kvsg3mVQJei9k1JKjFIiy7fwtHTd4A4OuWTnaHajAQG+xPAkYT3N4yVyLoTHfN5bpXecrAqI3vqnGt2T+dMLanXjW1r82xwaJlEvaYCRwA7XYBEzgrs5oV7LOCuR7JEstyceVyQZsj40Gnlfpj2+YVKciawGJiLrs748vew6sk01acvPVsSbPJRLuVRnAbBHIYVr1wIQIgaH2Ph8rZWB7Os2xSBgBo2iAXwLHJyc5ZxcClS5kMtxtMQnd+6m0eFlrWzLZZZ826FNjAKmHZZZOnZg52Pv0oLFkPz+MV3+Zvp5smL0YzscIzFIy+nTt/cZU1EB5s95SETL0iByNpzNwDV+ZH+6CUvEFo50idpe5rtaM3Nw42Me6TPg5jTXnHdd31l193s/qtrNQATL4ynIAEvvql2Ivb81J7Y4MJSmYLSZUzObrUXf3evbN6RGPXJ5OJyDmqg7W8/AfaAzfWsDrF+qkUVTOk0ULhGXXq9p2j6AtkvZzYW/we7oRqEgranxk2dfDPdffINz6FqqFwcIsJjKjUaV5mSY2ogU4uUJVSZ/4mnqYSqvOJj+vLWqLtoxCdd1Yw02smdYOv8WK5SPxDcWofmpiD8Z5V8GxNwFHbKCBhmzpStQCx9tcdA7tm3uMR3Z0t2na6PoJ3j+iNj3/j6MCmcnf8gazaUUTetyXed9yzcwj1XTaZT7G7lr5BRWQ3odTSJiRr4+JqSo7Lp3Fgm9I7kHhD/gAycpP37VCY3MowMoqG+VZMEPBdCA4P7GHOB3xvRRUIDXOLDze/vP8eCqmWbMGpnDzKpRUbRDYXUU5HmssucJF3Bh2C7Z9BvAndKJjSfDVSFQZ81HFW2838H6t46gTFKTjUb2aSHWNw4RWd/ZChYS49qrjOX42dbb0c9RwVSK1Qh95ylOPGLiTBhRydM512WQIKmo2vx2hVbNCWzwZlkbwNv9a4qYR39Y9WXXS/3W6TgJKbu6ioyhIvx2SCxztlENPQtJ0GR6G2epZCgBvVohRZ+CvBN8V+ln0n/GQQzgFk+1cs6XTx7rdj+SKX+tTe+SjOO9JyvIzg+CPqebVGssdUPldwbGBjpHFNNBkNyK3O24jaaQK4gTyte59xIPXyk3hcTZdKWTYrlEekFJYoDPamoFZkwxP2mKk/OhAf41Y="};const ITER=200000;
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function keyFromPin(pin){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(ENC.salt),iterations:ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']);
+}
+async function decryptWith(key){
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(ENC.iv)},key,b64(ENC.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+const lock=document.getElementById('lock'), pinBox=document.getElementById('pin'), cells=[...pinBox.children],
+      pinIn=document.getElementById('pinInput'), err=document.getElementById('lockErr');
+let busy=false;
+function paint(){
+  const n=pinIn.value.length;
+  cells.forEach((c,i)=>{c.classList.toggle('filled',i<n);c.classList.toggle('active',i===Math.min(n,5))});
+}
+function unlocked(rows,key){
+  try{ crypto.subtle.exportKey('raw',key).then(k=>sessionStorage.setItem('ledger-key',btoa(String.fromCharCode(...new Uint8Array(k))))) }catch(e){}
+  document.getElementById('app').hidden=false;
+  boot(rows);
+  lock.classList.add('out'); setTimeout(()=>lock.remove(),400);
+}
+async function submitPin(){
+  if(busy||pinIn.value.length<6) return;
+  busy=true; pinBox.classList.add('busy'); err.textContent='';
+  try{
+    const key=await keyFromPin(pinIn.value); const rows=await decryptWith(key);
+    unlocked(rows,key);
+  }catch(e){
+    pinBox.classList.remove('busy'); pinBox.classList.add('shake');
+    err.textContent='비밀번호가 맞지 않습니다';
+    setTimeout(()=>{pinBox.classList.remove('shake');pinIn.value='';paint();busy=false;pinIn.focus()},420);
+  }
+}
+pinIn.addEventListener('input',()=>{pinIn.value=pinIn.value.replace(/\D/g,'').slice(0,6);paint();if(pinIn.value.length===6)submitPin()});
+pinIn.addEventListener('focus',()=>pinBox.classList.add('focus'));
+pinIn.addEventListener('blur',()=>pinBox.classList.remove('focus'));
+pinBox.addEventListener('click',()=>pinIn.focus());
+document.getElementById('lockForm').addEventListener('submit',e=>{e.preventDefault();submitPin()});
+paint(); setTimeout(()=>pinIn.focus(),50);
+
+// 같은 탭에서는 새로고침해도 다시 묻지 않음
+(async()=>{
+  try{
+    const k=sessionStorage.getItem('ledger-key'); if(!k) return;
+    const key=await crypto.subtle.importKey('raw',b64(k),{name:'AES-GCM'},true,['decrypt']);
+    unlocked(await decryptWith(key),key);
+  }catch(e){ try{sessionStorage.removeItem('ledger-key')}catch(_){} }
+})();
+
+function boot(rows){
+DATA = rows.map((r,i)=>({i,name:r[0],amount:r[1],group:r[2]}));
 
 const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 const cho = s=>[...s].map(ch=>{const c=ch.charCodeAt(0);return c>=0xAC00&&c<=0xD7A3?CHO[Math.floor((c-0xAC00)/588)]:ch}).join('');
@@ -231,6 +322,7 @@ function render(){
   }).join('');
 }
 render();
+}
 </script>
 </body>
 </html>
