@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>축의금 장부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --surface-2:#eef0ec;
+  --ink:#1c2128; --ink-2:#4b535d; --ink-3:#7d858f;
+  --line:#dde1db; --line-2:#c9cfc6;
+  --accent:#2f4a8a; --accent-ink:#ffffff; --accent-soft:#e6ebf6;
+  --mark:#fbe7a6; --mark-ink:#3a2f00;
+  --shadow:0 1px 2px rgba(28,33,40,.06),0 8px 24px -12px rgba(28,33,40,.18);
+  --radius:14px; --radius-s:8px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171b; --surface:#1c2025; --surface-2:#242930;
+    --ink:#e8eaee; --ink-2:#aeb4bc; --ink-3:#7c838c;
+    --line:#2c3138; --line-2:#3a4048;
+    --accent:#93a9e3; --accent-ink:#0f1626; --accent-soft:#22304e;
+    --mark:#5a4a12; --mark-ink:#ffe9a8;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171b; --surface:#1c2025; --surface-2:#242930;
+  --ink:#e8eaee; --ink-2:#aeb4bc; --ink-3:#7c838c;
+  --line:#2c3138; --line-2:#3a4048;
+  --accent:#93a9e3; --accent-ink:#0f1626; --accent-soft:#22304e;
+  --mark:#5a4a12; --mark-ink:#ffe9a8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:15px; line-height:1.5; padding-inline:16px; padding-block:0 64px;
+}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto}
+
+/* ── header ── */
+.head{padding-block:44px 22px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.head h1{
+  font-family:"Gowun Batang","Nanum Myeongjo","Apple Myungjo",Batang,serif;
+  font-weight:700;font-size:34px;line-height:1.15;letter-spacing:-.01em;margin:0;text-wrap:balance
+}
+.head .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px;font-weight:500}
+.totals{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.totals div{display:flex;flex-direction:column;gap:2px}
+.totals dt{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+.totals dd{margin:0;font-size:20px;font-weight:600;line-height:1.2}
+.totals dd small{font-size:13px;font-weight:500;color:var(--ink-2);margin-left:2px}
+
+/* ── search ── */
+.tools{position:sticky;top:0;z-index:5;background:var(--bg);padding-block:8px 12px;margin-inline:-16px;padding-inline:16px}
+.tools-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.search{position:relative}
+.search svg{position:absolute;left:16px;top:50%;translate:0 -50%;width:18px;height:18px;color:var(--ink-3);pointer-events:none}
+.search input{
+  width:100%;height:52px;padding:0 44px 0 46px;border-radius:var(--radius);
+  border:1px solid var(--line-2);background:var(--surface);box-shadow:var(--shadow);
+  font-size:17px;transition:border-color .15s
+}
+.search input::placeholder{color:var(--ink-3)}
+.search input::-webkit-search-cancel-button,.search input::-webkit-search-decoration{-webkit-appearance:none;display:none}
+.search input:focus{border-color:var(--accent);outline:none;box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.clear{position:absolute;right:8px;top:50%;translate:0 -50%;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink-3);cursor:pointer;display:grid;place-items:center}
+.clear:hover{background:var(--surface-2);color:var(--ink)}
+.clear[hidden]{display:none!important}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.chip{
+  border:1px solid var(--line-2);background:var(--surface);border-radius:999px;
+  padding:5px 12px;font-size:13px;cursor:pointer;line-height:1.3;display:inline-flex;gap:6px;align-items:center;color:var(--ink-2)
+}
+.chip b{font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] b{color:var(--accent-ink);opacity:.75}
+.sort{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 30px 5px 12px;font-size:13px;color:var(--ink-2);cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d858f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+
+/* ── list ── */
+.status{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 4px 8px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.status strong{color:var(--ink-2);font-weight:500}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.thead,.item{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 160px;gap:12px;align-items:center;padding:0 18px}
+.thead{height:38px;font-size:12px;color:var(--ink-3);letter-spacing:.06em;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.thead span:last-child,.amt{text-align:right}
+.item{min-height:54px;padding-block:10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.item:first-child{border-top:0}
+.name{font-weight:600;font-size:16px;letter-spacing:-.01em;overflow-wrap:anywhere}
+.group{color:var(--ink-2);font-size:14px}
+.amt{font-weight:600;font-size:16px;white-space:nowrap}
+.amt small{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:4px}
+mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 1px}
+.empty{padding:48px 20px;text-align:center;color:var(--ink-3)}
+.empty strong{display:block;color:var(--ink);font-weight:500;margin-bottom:4px}
+.foot{padding:24px 4px 0;font-size:12px;color:var(--ink-3);line-height:1.6}
+.foot kbd{font:inherit;border:1px solid var(--line-2);border-radius:4px;padding:0 5px;background:var(--surface)}
+
+@media (max-width:560px){
+  .head{padding-top:32px}
+  .head h1{font-size:28px}
+  .totals{gap:16px}
+  .totals dd{font-size:18px}
+  .thead{display:none}
+  .item{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name amt" "group amt";row-gap:1px;padding-inline:16px}
+  .name{grid-area:name}.group{grid-area:group;font-size:13px}.amt{grid-area:amt}
+}
+/* 소속 컬럼이 없는 장부 */
+.no-group .chips{display:none}
+.no-group .row2{justify-content:flex-end}
+.no-group .thead,.no-group .item{grid-template-columns:minmax(0,1fr) 160px}
+.no-group .group,.no-group .thead span:nth-child(2){display:none}
+@media (max-width:560px){.no-group .item{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name amt"}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── lock ── */
+.lock{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;place-items:center;padding:24px 16px;transition:opacity .35s}
+.lock.out{opacity:0;pointer-events:none}
+.lock-card{width:100%;max-width:380px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0}
+.lock-card .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px;font-weight:500}
+.lock-card h1{font-family:"Gowun Batang","Nanum Myeongjo","Apple Myungjo",Batang,serif;font-weight:700;font-size:34px;line-height:1.15;margin:0 0 30px;letter-spacing:-.01em}
+.lock-hint{margin:0 0 18px;font-size:14px;color:var(--ink-2)}
+.pin{display:flex;gap:10px;cursor:text;padding:6px}
+.pin-cell{width:46px;height:56px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;transition:border-color .15s,transform .15s}
+.pin-cell::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--ink);transform:scale(0);transition:transform .12s}
+.pin-cell.filled::after{transform:scale(1)}
+.pin.focus .pin-cell.active{border-color:var(--accent);box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.pin.busy .pin-cell{opacity:.55}
+.pin.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.lock-err{min-height:22px;margin:14px 0 0;font-size:13px;color:#b8443f}
+:root[data-theme="dark"] .lock-err{color:#e8918c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lock-err{color:#e8918c}}
+.sr{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;pointer-events:none}
+.app[hidden]{display:none}
+@media (max-width:400px){.pin{gap:8px}.pin-cell{width:40px;height:50px}}
+</style>
+</head>
+<body>
+
+<div class="lock" id="lock">
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <p class="eyebrow">Wedding · Gift Ledger</p>
+    <h1>축의금 장부</h1>
+    <p class="lock-hint" id="lockHint">비밀번호 6자리를 입력하세요</p>
+    <div class="pin" id="pin" aria-hidden="true">
+      <span class="pin-cell active"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span><span class="pin-cell"></span>
+    </div>
+    <input id="pinInput" class="sr" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-label="비밀번호 6자리" autofocus>
+    <p class="lock-err" id="lockErr" role="alert"></p>
+  </form>
+</div>
+<div class="app" id="app" hidden>
+
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Wedding · Gift Ledger</p>
+      <h1>축의금 장부</h1>
+    </div>
+    <dl class="totals">
+      <div><dt>인원</dt><dd id="tCount">–</dd></div>
+    </dl>
+  </header>
+</div>
+
+<div class="tools">
+  <div class="tools-inner">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="이름 또는 소속 검색  (초성 검색 가능: ㄱㄷㅊ)" aria-label="이름 또는 소속 검색">
+      <button class="clear" id="clear" type="button" aria-label="검색어 지우기" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="row2">
+      <div class="chips" id="chips" role="group" aria-label="소속 필터"></div>
+      <select class="sort" id="sort" aria-label="정렬">
+        <option value="orig">입력순</option>
+        <option value="name">이름순</option>
+        <option value="amtDesc">금액 높은순</option>
+        <option value="amtAsc">금액 낮은순</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="status"><span id="statusL">전체</span><span id="statusR"></span></div>
+  <section class="list" aria-live="polite">
+    <div class="thead"><span>성명</span><span>소속</span><span>축의금</span></div>
+    <div id="rows"></div>
+  </section>
+  <p class="foot">이름 일부나 초성만 입력해도 찾을 수 있습니다. 같은 이름이 두 번 있으면 장부에 두 건이 기록된 것입니다. · <kbd>Esc</kbd> 검색 지우기</p>
+</div>
+
+</div>
+<script>
+let DATA;
+const ENC={salt:"nnQpLYaqWqFRLpIp47SEaw==",iv:"Iayoy5+dPrBq5KNq",ct:"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"};const ITER=200000;
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function keyFromPin(pin){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(ENC.salt),iterations:ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']);
+}
+async function decryptWith(key){
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(ENC.iv)},key,b64(ENC.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+const lock=document.getElementById('lock'), pinBox=document.getElementById('pin'), cells=[...pinBox.children],
+      pinIn=document.getElementById('pinInput'), err=document.getElementById('lockErr');
+let busy=false;
+function paint(){
+  const n=pinIn.value.length;
+  cells.forEach((c,i)=>{c.classList.toggle('filled',i<n);c.classList.toggle('active',i===Math.min(n,5))});
+}
+function unlocked(rows,key){
+  try{ crypto.subtle.exportKey('raw',key).then(k=>sessionStorage.setItem('ledger-key',btoa(String.fromCharCode(...new Uint8Array(k))))) }catch(e){}
+  document.getElementById('app').hidden=false;
+  boot(rows);
+  lock.classList.add('out'); setTimeout(()=>lock.remove(),400);
+}
+async function submitPin(){
+  if(busy||pinIn.value.length<6) return;
+  busy=true; pinBox.classList.add('busy'); err.textContent='';
+  try{
+    const key=await keyFromPin(pinIn.value); const rows=await decryptWith(key);
+    unlocked(rows,key);
+  }catch(e){
+    pinBox.classList.remove('busy'); pinBox.classList.add('shake');
+    err.textContent='비밀번호가 맞지 않습니다';
+    setTimeout(()=>{pinBox.classList.remove('shake');pinIn.value='';paint();busy=false;pinIn.focus()},420);
+  }
+}
+pinIn.addEventListener('input',()=>{pinIn.value=pinIn.value.replace(/\D/g,'').slice(0,6);paint();if(pinIn.value.length===6)submitPin()});
+pinIn.addEventListener('focus',()=>pinBox.classList.add('focus'));
+pinIn.addEventListener('blur',()=>pinBox.classList.remove('focus'));
+pinBox.addEventListener('click',()=>pinIn.focus());
+document.getElementById('lockForm').addEventListener('submit',e=>{e.preventDefault();submitPin()});
+paint(); setTimeout(()=>pinIn.focus(),50);
+
+// 같은 탭에서는 새로고침해도 다시 묻지 않음
+(async()=>{
+  try{
+    const k=sessionStorage.getItem('ledger-key'); if(!k) return;
+    const key=await crypto.subtle.importKey('raw',b64(k),{name:'AES-GCM'},true,['decrypt']);
+    unlocked(await decryptWith(key),key);
+  }catch(e){ try{sessionStorage.removeItem('ledger-key')}catch(_){} }
+})();
+
+function boot(rows){
+DATA = rows.map((r,i)=>({i,name:r[0],amount:r[1],group:r[2]}));
+
+const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const cho = s=>[...s].map(ch=>{const c=ch.charCodeAt(0);return c>=0xAC00&&c<=0xD7A3?CHO[Math.floor((c-0xAC00)/588)]:ch}).join('');
+const isChoQuery = s=>s.length>0&&[...s].every(ch=>CHO.includes(ch));
+DATA.forEach(r=>{r.cho=cho(r.name);r.lname=r.name.toLowerCase();r.lgroup=r.group.toLowerCase()});
+
+const won = n=>n.toLocaleString('ko-KR')+'원';
+const man = n=>{ if(n%10000) return ''; const m=n/10000; return m>=10000?(m/10000)+'억':m+'만'; };
+const esc = s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// 검색어와 일치하는 부분 강조 (초성 검색이면 글자 단위로 위치 매핑)
+function hl(text,low,q,choQ){
+  if(!q) return esc(text);
+  const src = choQ?cho(text):low;
+  const at = src.indexOf(q);
+  if(at<0) return esc(text);
+  return esc(text.slice(0,at))+'<mark>'+esc(text.slice(at,at+q.length))+'</mark>'+esc(text.slice(at+q.length));
+}
+
+const groups = [...new Set(DATA.map(r=>r.group))].filter(Boolean);
+if(!groups.length){document.body.classList.add('no-group');document.getElementById('q').placeholder='이름 검색  (초성 검색 가능: ㄱㄷㅊ)';}
+const counts = Object.fromEntries(groups.map(g=>[g,DATA.filter(r=>r.group===g).length]));
+let state={q:'',group:'',sort:'orig'};
+
+const $=id=>document.getElementById(id);
+const chips=$('chips');
+chips.innerHTML = ['',...groups].map(g=>`<button class="chip" type="button" data-g="${esc(g)}" aria-pressed="${g===''}">${g||'전체'} <b>${g?counts[g]:DATA.length}</b></button>`).join('');
+chips.addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  state.group=b.dataset.g;
+  chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+  render();
+});
+
+const qIn=$('q');
+qIn.addEventListener('input',()=>{state.q=qIn.value.trim();$('clear').hidden=!state.q;render()});
+qIn.addEventListener('keydown',e=>{if(e.key==='Escape'){qIn.value='';state.q='';$('clear').hidden=true;render()}});
+$('clear').addEventListener('click',()=>{qIn.value='';state.q='';$('clear').hidden=true;qIn.focus();render()});
+$('sort').addEventListener('change',e=>{state.sort=e.target.value;render()});
+
+function render(){
+  const q=state.q.toLowerCase().replace(/\s+/g,''), choQ=isChoQuery(q);
+  let rows=DATA.filter(r=>(!state.group||r.group===state.group)&&
+    (!q||(choQ?r.cho.includes(q)||r.lname.includes(q):r.lname.includes(q)||r.lgroup.includes(q))));
+  const s=state.sort;
+  if(s==='name') rows=[...rows].sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  else if(s==='amtDesc') rows=[...rows].sort((a,b)=>b.amount-a.amount||a.i-b.i);
+  else if(s==='amtAsc') rows=[...rows].sort((a,b)=>a.amount-b.amount||a.i-b.i);
+
+  const sum=rows.reduce((t,r)=>t+r.amount,0);
+  $('tCount').innerHTML=rows.length+'<small>명</small>';
+  $('statusL').innerHTML=(q?`“<strong>${esc(state.q)}</strong>” 검색 결과`:(state.group?`<strong>${esc(state.group)}</strong>`:'전체'))+` ${rows.length}건`;
+  $('statusR').textContent=rows.length&&rows.length<DATA.length?`합계 ${won(sum)}`:'';
+
+  if(!rows.length){
+    $('rows').innerHTML=`<div class="empty"><strong>“${esc(state.q)}”에 해당하는 내역이 없습니다</strong>이름의 일부나 초성으로 다시 검색해 보세요.</div>`;
+    return;
+  }
+  $('rows').innerHTML=rows.map(r=>{
+    const nameH = hl(r.name,r.lname,q,choQ&&!r.lname.includes(q));
+    const groupH = (!choQ&&q)?hl(r.group,r.lgroup,q,false):esc(r.group);
+    const m=man(r.amount);
+    return `<div class="item"><span class="name">${nameH}</span><span class="group">${groupH}</span><span class="amt">${won(r.amount)}${m?`<small>${m}</small>`:''}</span></div>`;
+  }).join('');
+}
+render();
+}
+</script>
+</body>
+</html>
