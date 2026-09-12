@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>축의금 장부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --surface-2:#eef0ec;
+  --ink:#1c2128; --ink-2:#4b535d; --ink-3:#7d858f;
+  --line:#dde1db; --line-2:#c9cfc6;
+  --accent:#2f4a8a; --accent-ink:#ffffff; --accent-soft:#e6ebf6;
+  --mark:#fbe7a6; --mark-ink:#3a2f00;
+  --shadow:0 1px 2px rgba(28,33,40,.06),0 8px 24px -12px rgba(28,33,40,.18);
+  --radius:14px; --radius-s:8px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171b; --surface:#1c2025; --surface-2:#242930;
+    --ink:#e8eaee; --ink-2:#aeb4bc; --ink-3:#7c838c;
+    --line:#2c3138; --line-2:#3a4048;
+    --accent:#93a9e3; --accent-ink:#0f1626; --accent-soft:#22304e;
+    --mark:#5a4a12; --mark-ink:#ffe9a8;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171b; --surface:#1c2025; --surface-2:#242930;
+  --ink:#e8eaee; --ink-2:#aeb4bc; --ink-3:#7c838c;
+  --line:#2c3138; --line-2:#3a4048;
+  --accent:#93a9e3; --accent-ink:#0f1626; --accent-soft:#22304e;
+  --mark:#5a4a12; --mark-ink:#ffe9a8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:15px; line-height:1.5; padding-inline:16px; padding-block:0 64px;
+}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto}
+
+/* ── header ── */
+.head{padding-block:44px 22px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.head h1{
+  font-family:"Gowun Batang","Nanum Myeongjo","Apple Myungjo",Batang,serif;
+  font-weight:700;font-size:34px;line-height:1.15;letter-spacing:-.01em;margin:0;text-wrap:balance
+}
+.head .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px;font-weight:500}
+.totals{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.totals div{display:flex;flex-direction:column;gap:2px}
+.totals dt{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+.totals dd{margin:0;font-size:20px;font-weight:600;line-height:1.2}
+.totals dd small{font-size:13px;font-weight:500;color:var(--ink-2);margin-left:2px}
+
+/* ── search ── */
+.tools{position:sticky;top:0;z-index:5;background:var(--bg);padding-block:8px 12px;margin-inline:-16px;padding-inline:16px}
+.tools-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.search{position:relative}
+.search svg{position:absolute;left:16px;top:50%;translate:0 -50%;width:18px;height:18px;color:var(--ink-3);pointer-events:none}
+.search input{
+  width:100%;height:52px;padding:0 44px 0 46px;border-radius:var(--radius);
+  border:1px solid var(--line-2);background:var(--surface);box-shadow:var(--shadow);
+  font-size:17px;transition:border-color .15s
+}
+.search input::placeholder{color:var(--ink-3)}
+.search input::-webkit-search-cancel-button,.search input::-webkit-search-decoration{-webkit-appearance:none;display:none}
+.search input:focus{border-color:var(--accent);outline:none;box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.clear{position:absolute;right:8px;top:50%;translate:0 -50%;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink-3);cursor:pointer;display:grid;place-items:center}
+.clear:hover{background:var(--surface-2);color:var(--ink)}
+.clear[hidden]{display:none!important}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.chip{
+  border:1px solid var(--line-2);background:var(--surface);border-radius:999px;
+  padding:5px 12px;font-size:13px;cursor:pointer;line-height:1.3;display:inline-flex;gap:6px;align-items:center;color:var(--ink-2)
+}
+.chip b{font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] b{color:var(--accent-ink);opacity:.75}
+.sort{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 30px 5px 12px;font-size:13px;color:var(--ink-2);cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d858f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+
+/* ── list ── */
+.status{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 4px 8px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.status strong{color:var(--ink-2);font-weight:500}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.thead,.item{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 160px;gap:12px;align-items:center;padding:0 18px}
+.thead{height:38px;font-size:12px;color:var(--ink-3);letter-spacing:.06em;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.thead span:last-child,.amt{text-align:right}
+.item{min-height:54px;padding-block:10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.item:first-child{border-top:0}
+.name{font-weight:600;font-size:16px;letter-spacing:-.01em;overflow-wrap:anywhere}
+.group{color:var(--ink-2);font-size:14px}
+.amt{font-weight:600;font-size:16px;white-space:nowrap}
+.amt small{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:4px}
+mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 1px}
+.empty{padding:48px 20px;text-align:center;color:var(--ink-3)}
+.empty strong{display:block;color:var(--ink);font-weight:500;margin-bottom:4px}
+.foot{padding:24px 4px 0;font-size:12px;color:var(--ink-3);line-height:1.6}
+.foot kbd{font:inherit;border:1px solid var(--line-2);border-radius:4px;padding:0 5px;background:var(--surface)}
+
+@media (max-width:560px){
+  .head{padding-top:32px}
+  .head h1{font-size:28px}
+  .totals{gap:16px}
+  .totals dd{font-size:18px}
+  .thead{display:none}
+  .item{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name amt" "group amt";row-gap:1px;padding-inline:16px}
+  .name{grid-area:name}.group{grid-area:group;font-size:13px}.amt{grid-area:amt}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Wedding · Gift Ledger</p>
+      <h1>축의금 장부</h1>
+    </div>
+    <dl class="totals">
+      <div><dt>인원</dt><dd id="tCount">–</dd></div>
+    </dl>
+  </header>
+</div>
+
+<div class="tools">
+  <div class="tools-inner">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="이름 또는 소속 검색  (초성 검색 가능: ㄱㄷㅊ)" aria-label="이름 또는 소속 검색">
+      <button class="clear" id="clear" type="button" aria-label="검색어 지우기" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="row2">
+      <div class="chips" id="chips" role="group" aria-label="소속 필터"></div>
+      <select class="sort" id="sort" aria-label="정렬">
+        <option value="orig">입력순</option>
+        <option value="name">이름순</option>
+        <option value="amtDesc">금액 높은순</option>
+        <option value="amtAsc">금액 낮은순</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="status"><span id="statusL">전체</span><span id="statusR"></span></div>
+  <section class="list" aria-live="polite">
+    <div class="thead"><span>성명</span><span>소속</span><span>축의금</span></div>
+    <div id="rows"></div>
+  </section>
+  <p class="foot">이름 일부나 초성만 입력해도 찾을 수 있습니다. 같은 이름이 두 번 있으면 장부에 두 건이 기록된 것입니다. · <kbd>Esc</kbd> 검색 지우기</p>
+</div>
+
+<script>
+const DATA = [["황순향",100000,"삼성증권"],["김동철",100000,"삼성증권"],["박동진",100000,"삼성증권"],["김성훈",50000,"삼성증권"],["박천호",100000,"삼성증권"],["김영경",2000000,"가족"],["진성은",300000,"친구"],["이다혜",400000,"친구"],["김재니",150000,"삼성증권"],["이선규",100000,"엄마빠"],["이수란",100000,"영경친구"],["이강욱",150000,"친구"],["정효진",300000,"친구"],["이형도",300000,"엄마빠"],["차동현",200000,"삼성증권"],["김종열",100000,"삼성증권"],["최비호",200000,"가족"],["유이슬",100000,"삼성증권"],["최인옥",100000,"엄마빠"],["박희주",300000,"친구"],["채정민",100000,"친구"],["이인재",100000,"삼성증권"],["이춘옥",200000,"엄마빠"],["김정은",100000,"삼성증권"],["정보빈",100000,"삼성증권"],["한근순 외 상원, 상구",500000,"엄마빠"],["구자성",300000,"삼성증권"],["송준범",300000,"엄마빠"],["김순옥",1000000,"엄마빠"],["최준호",100000,"삼성증권"],["서인정",100000,"삼성증권"],["정민우",100000,"삼성증권"],["지선팸",1200000,"친구"],["허재원",100000,"친구"],["최지호",200000,"가족"],["정이영",100000,"삼성증권"],["김현중",200000,"삼성증권"],["임규철",100000,"삼성증권"],["목동 (작은고모)",500000,"엄마빠"],["유영원",100000,"삼성증권"],["황아영",200000,"삼성증권"],["남승범",70000,"삼성증권"],["강민기, 한용철",300000,"엄마빠"],["이수화",100000,"삼성증권"],["이성혁",100000,"삼성증권"],["정선아",100000,"삼성증권"],["이보민",200000,"삼성증권"],["김수성",100000,"삼성증권"],["허윤경",150000,"삼성증권"],["강윤서",50000,"삼성증권"],["이혜린",100000,"삼성증권"],["김해찬",100000,"삼성증권"],["정유진",100000,"삼성증권"],["김남균",100000,"삼성증권"],["성시업",100000,"삼성증권"],["이민아",100000,"삼성증권"],["권종현",100000,"삼성증권"],["김준우",50000,"삼성증권"],["전상구",100000,"삼성증권"],["문예진",100000,"삼성증권"],["최윤자",300000,"엄마빠"],["이준규",100000,"삼성증권"],["김영균",150000,"가족"],["김이화",150000,"삼성증권"],["한효정",50000,"삼성증권"],["장자은",150000,"삼성증권"],["한귀석",100000,"엄마빠"],["함정옥",100000,"엄마빠"],["이다경",100000,"친구"],["조진영",100000,"삼성증권"],["박준병",100000,"삼성증권"],["방보훈",100000,"삼성증권"],["이한준",50000,"삼성증권"],["신재희",100000,"삼성증권"],["이동진",100000,"삼성증권"],["전세린",200000,"삼성증권"],["정서린/홍승민",400000,"삼성증권"],["용혜수",500000,"삼성증권"],["권형석",100000,"삼성증권"],["오주헌",100000,"삼성증권"],["유성민",100000,"삼성증권"],["권용",250000,"삼성증권"],["문초은",100000,"삼성증권"],["송윤수",150000,"삼성증권"],["박미현",200000,"엄마빠"],["홍주희",100000,"삼성증권"],["정유진",100000,"삼성증권"],["최범준",100000,"삼성증권"],["이주하",100000,"삼성증권"],["전문수",100000,"삼성증권"],["윤한일/오진영",200000,"삼성증권"],["김민수",50000,"삼성증권"],["정인후",100000,"삼성증권"],["반소진",100000,"영경친구"],["박혜진",100000,"영경친구"],["정상원",100000,"삼성증권"],["신호철",100000,"삼성증권"],["김진성",100000,"삼성증권"],["이호승",100000,"삼성증권"],["한성원",100000,"삼성증권"],["스페인이모(부)",1000000,"엄마빠"],["오선주",100000,"삼성증권"],["구슬아",300000,"삼성증권"],["최현승",50000,"삼성증권"],["박현영",100000,"삼성증권"],["권순일",100000,"삼성증권"],["강제훈",100000,"삼성증권"],["박민지",100000,"삼성증권"],["이진용",100000,"삼성증권"],["박민진",100000,"삼성증권"],["황선영",100000,"삼성증권"],["허존욱",100000,"삼성증권"],["나윤수",100000,"삼성증권"],["김지환",100000,"삼성증권"],["왕호준",100000,"삼성증권"],["김재원",100000,"삼성증권"],["신유미",100000,"삼성증권"],["이훈교",100000,"삼성증권"],["김판규",100000,"삼성증권"],["장윤철",100000,"가족"],["박창민",200000,"삼성증권"],["이충섭",100000,"삼성증권"],["홍현석",100000,"삼성증권"],["박창현",100000,"삼성증권"],["성연진",100000,"삼성증권"],["류현웅",100000,"삼성증권"],["최윤식",100000,"삼성증권"],["맹현선",100000,"삼성증권"],["류정현",100000,"삼성증권"],["김영옥",100000,"삼성증권"],["손기혁",100000,"삼성증권"],["정재현",100000,"삼성증권"],["어용일",50000,"삼성증권"],["박세형",50000,"삼성증권"],["조형석",200000,"삼성증권"],["김창원",100000,"삼성증권"],["정재호",100000,"삼성증권"],["전현서",150000,"삼성증권"],["윤유성",100000,"삼성증권"],["황용규",100000,"삼성증권"],["김기범",100000,"삼성증권"],["이준홍",50000,"삼성증권"],["정윤숙",50000,"삼성증권"],["장병수",50000,"삼성증권"],["김오방이",2000000,"친구"],["전세호",100000,"삼성증권"],["김회원",150000,"삼성증권"],["장유준",100000,"삼성증권"],["김민희",200000,"삼성증권"],["김세원",100000,"삼성증권"],["권택두",100000,"삼성증권"],["김지환",100000,"삼성증권"],["이승엽",300000,"삼성증권"],["김소연",100000,"삼성증권"],["임종경",200000,"엄마빠"],["신현민",150000,"삼성증권"],["임광수",1000000,"엄마빠"],["한부근",200000,"삼성증권"],["박민호",100000,"삼성증권"],["이정영",50000,"삼성증권"],["강경민",200000,"삼성증권"],["심현정",100000,"삼성증권"],["임일수",1000000,"엄마빠"],["이현석",100000,"삼성증권"],["김덕기",100000,"삼성증권"],["이한호",100000,"삼성증권"],["도옥현",100000,"삼성증권"],["배소윤",50000,"삼성증권"],["표승수",100000,"삼성증권"],["박종경",100000,"삼성증권"],["정겨운",100000,"영경친구"],["박소정",100000,"영경친구"],["남신애",50000,"삼성증권"],["신동현",100000,"삼성증권"],["김영찬",150000,"가족"],["이예리",100000,"삼성증권"],["추예나",100000,"삼성증권"],["한지혜",100000,"삼성증권"],["한종엽",100000,"친구"],["박기태",150000,"삼성증권"],["황상익",100000,"삼성증권"],["정재욱",50000,"삼성증권"],["오선미",100000,"삼성증권"],["홍영민",100000,"삼성증권"],["이영진",100000,"삼성증권"],["홍석표",100000,"삼성증권"],["서태희",100000,"삼성증권"],["이지훈",100000,"삼성증권"],["오병래",50000,"삼성증권"],["박가람",50000,"삼성증권"],["신원창",100000,"삼성증권"],["신현정",50000,"삼성증권"],["정희석",50000,"삼성증권"],["박진선",100000,"삼성증권"],["이주영",50000,"삼성증권"],["이홍기",100000,"삼성증권"],["박은희",50000,"삼성증권"],["시내어머니",200000,"친구"],["이지수",100000,"삼성증권"],["김정환",100000,"삼성증권"],["결혼축하드립니다.",100000,"삼성증권"],["최은영",100000,"삼성증권"],["이성재",50000,"삼성증권"],["김동환",500000,"엄마빠"],["윤도현",50000,"삼성증권"],["김현우",50000,"친구"],["이진호",100000,"삼성증권"],["남주엽",50000,"삼성증권"],["김진아",50000,"삼성증권"],["김희선",200000,"삼성증권"],["최성주",50000,"삼성증권"],["최은규",100000,"삼성증권"],["임지희",50000,"삼성증권"],["양정균",50000,"삼성증권"],["김형선",100000,"삼성증권"],["하성협",50000,"삼성증권"],["음지영",50000,"삼성증권"],["양성열",100000,"삼성증권"],["허원영",100000,"삼성증권"],["권희은",100000,"삼성증권"],["조혜란",50000,"삼성증권"],["김형주",50000,"삼성증권"],["이상우",50000,"삼성증권"],["지선언니",300000,"친구"]].map((r,i)=>({i,name:r[0],amount:r[1],group:r[2]}));
+
+const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const cho = s=>[...s].map(ch=>{const c=ch.charCodeAt(0);return c>=0xAC00&&c<=0xD7A3?CHO[Math.floor((c-0xAC00)/588)]:ch}).join('');
+const isChoQuery = s=>s.length>0&&[...s].every(ch=>CHO.includes(ch));
+DATA.forEach(r=>{r.cho=cho(r.name);r.lname=r.name.toLowerCase();r.lgroup=r.group.toLowerCase()});
+
+const won = n=>n.toLocaleString('ko-KR')+'원';
+const man = n=>{ if(n%10000) return ''; const m=n/10000; return m>=10000?(m/10000)+'억':m+'만'; };
+const esc = s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// 검색어와 일치하는 부분 강조 (초성 검색이면 글자 단위로 위치 매핑)
+function hl(text,low,q,choQ){
+  if(!q) return esc(text);
+  const src = choQ?cho(text):low;
+  const at = src.indexOf(q);
+  if(at<0) return esc(text);
+  return esc(text.slice(0,at))+'<mark>'+esc(text.slice(at,at+q.length))+'</mark>'+esc(text.slice(at+q.length));
+}
+
+const groups = [...new Set(DATA.map(r=>r.group))];
+const counts = Object.fromEntries(groups.map(g=>[g,DATA.filter(r=>r.group===g).length]));
+let state={q:'',group:'',sort:'orig'};
+
+const $=id=>document.getElementById(id);
+const chips=$('chips');
+chips.innerHTML = ['',...groups].map(g=>`<button class="chip" type="button" data-g="${esc(g)}" aria-pressed="${g===''}">${g||'전체'} <b>${g?counts[g]:DATA.length}</b></button>`).join('');
+chips.addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  state.group=b.dataset.g;
+  chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+  render();
+});
+
+const qIn=$('q');
+qIn.addEventListener('input',()=>{state.q=qIn.value.trim();$('clear').hidden=!state.q;render()});
+qIn.addEventListener('keydown',e=>{if(e.key==='Escape'){qIn.value='';state.q='';$('clear').hidden=true;render()}});
+$('clear').addEventListener('click',()=>{qIn.value='';state.q='';$('clear').hidden=true;qIn.focus();render()});
+$('sort').addEventListener('change',e=>{state.sort=e.target.value;render()});
+
+function render(){
+  const q=state.q.toLowerCase().replace(/\s+/g,''), choQ=isChoQuery(q);
+  let rows=DATA.filter(r=>(!state.group||r.group===state.group)&&
+    (!q||(choQ?r.cho.includes(q)||r.lname.includes(q):r.lname.includes(q)||r.lgroup.includes(q))));
+  const s=state.sort;
+  if(s==='name') rows=[...rows].sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  else if(s==='amtDesc') rows=[...rows].sort((a,b)=>b.amount-a.amount||a.i-b.i);
+  else if(s==='amtAsc') rows=[...rows].sort((a,b)=>a.amount-b.amount||a.i-b.i);
+
+  const sum=rows.reduce((t,r)=>t+r.amount,0);
+  $('tCount').innerHTML=rows.length+'<small>명</small>';
+  $('statusL').innerHTML=(q?`“<strong>${esc(state.q)}</strong>” 검색 결과`:(state.group?`<strong>${esc(state.group)}</strong>`:'전체'))+` ${rows.length}건`;
+  $('statusR').textContent=rows.length&&rows.length<DATA.length?`합계 ${won(sum)}`:'';
+
+  if(!rows.length){
+    $('rows').innerHTML=`<div class="empty"><strong>“${esc(state.q)}”에 해당하는 내역이 없습니다</strong>이름의 일부나 초성으로 다시 검색해 보세요.</div>`;
+    return;
+  }
+  $('rows').innerHTML=rows.map(r=>{
+    const nameH = hl(r.name,r.lname,q,choQ&&!r.lname.includes(q));
+    const groupH = (!choQ&&q)?hl(r.group,r.lgroup,q,false):esc(r.group);
+    const m=man(r.amount);
+    return `<div class="item"><span class="name">${nameH}</span><span class="group">${groupH}</span><span class="amt">${won(r.amount)}${m?`<small>${m}</small>`:''}</span></div>`;
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>
