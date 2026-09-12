@@ -130,7 +130,6 @@ mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 1p
     </div>
     <dl class="totals">
       <div><dt>인원</dt><dd id="tCount">–</dd></div>
-      <div><dt>합계</dt><dd id="tSum">–</dd></div>
     </dl>
   </header>
 </div>
@@ -217,7 +216,6 @@ function render(){
 
   const sum=rows.reduce((t,r)=>t+r.amount,0);
   $('tCount').innerHTML=rows.length+'<small>명</small>';
-  $('tSum').textContent=won(sum);
   $('statusL').innerHTML=(q?`“<strong>${esc(state.q)}</strong>” 검색 결과`:(state.group?`<strong>${esc(state.group)}</strong>`:'전체'))+` ${rows.length}건`;
   $('statusR').textContent=rows.length&&rows.length<DATA.length?`합계 ${won(sum)}`:'';
 
